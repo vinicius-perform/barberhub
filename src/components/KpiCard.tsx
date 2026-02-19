@@ -1,5 +1,6 @@
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface KpiCardProps {
     title: string;
@@ -9,38 +10,82 @@ interface KpiCardProps {
     color: 'blue' | 'purple' | 'emerald' | 'amber';
 }
 
-const colorMap = {
-    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
-    emerald: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-    amber: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
-}
-
-const progressMap = {
-    blue: 'bg-blue-500',
-    purple: 'bg-purple-500',
-    emerald: 'bg-emerald-500',
-    amber: 'bg-amber-500',
-}
-
 export function KpiCard({ title, value, change, icon: Icon, color }: KpiCardProps) {
+    // Map colors to our new dynamic palette
+    const colorStyles = {
+        blue: {
+            bg: 'from-blue-500/10 to-transparent',
+            iconBg: 'bg-blue-500/20',
+            iconColor: 'text-blue-400',
+            bar: 'bg-blue-500'
+        },
+        purple: {
+            bg: 'from-purple-500/10 to-transparent',
+            iconBg: 'bg-purple-500/20',
+            iconColor: 'text-purple-400',
+            bar: 'bg-purple-500'
+        },
+        emerald: {
+            bg: 'from-emerald-500/10 to-transparent',
+            iconBg: 'bg-emerald-500/20',
+            iconColor: 'text-emerald-400',
+            bar: 'bg-emerald-500'
+        },
+        amber: {
+            bg: 'from-amber-500/10 to-transparent',
+            iconBg: 'bg-amber-500/20',
+            iconColor: 'text-amber-400',
+            bar: 'bg-amber-500'
+        }
+    };
+
+    // Default to blue if invalid
+    const style = colorStyles[color] || colorStyles.blue;
+    const isPositive = change.startsWith('+');
+
     return (
-        <div className="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
-            <div className="flex justify-between items-start mb-4">
-                <div className={cn("p-2 rounded-lg", colorMap[color])}>
-                    <Icon className="w-5 h-5" />
+        <div className={cn(
+            "relative p-6 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-white/5 overflow-hidden group hover:border-primary-500/20 dark:hover:border-white/10 transition-all shadow-sm hover:shadow-md"
+        )}>
+            {/* Ambient Glow (Dark Mode Only) */}
+            <div className={cn("hidden dark:block absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-50 rounded-bl-full pointer-events-none", style.bg)} />
+
+            <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider">{title}</p>
+                    <div className={cn("p-2 rounded-xl transition-colors",
+                        // Light mode: solid gentle color. Dark mode: transparent glow.
+                        `${style.iconColor} bg-opacity-10 dark:bg-opacity-20`,
+                        style.iconBg
+                    )}>
+                        <Icon className={cn("w-5 h-5", style.iconColor)} />
+                    </div>
                 </div>
-                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 px-2 py-0.5 rounded-full">
-                    {change}
-                </span>
-            </div>
-            <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{title}</p>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</h3>
-            </div>
-            <div className="mt-4 h-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div className={cn("h-full rounded-full w-2/3", progressMap[color])}></div>
+
+                <div className="flex items-end justify-between">
+                    <div>
+                        <h3 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">{value}</h3>
+                        <div className="hidden h-1.5 w-24 bg-slate-100 dark:bg-dark-bg rounded-full overflow-hidden mt-2">
+                            <div className={cn("h-full rounded-full w-[70%]", style.bar)}></div>
+                        </div>
+                    </div>
+
+                    <div className={cn(
+                        "flex items-center text-xs font-bold px-2 py-1 rounded-lg",
+                        isPositive
+                            ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-400/10"
+                            : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-400/10"
+                    )}>
+                        {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                        {change}
+                    </div>
+                </div>
+
+                {/* Progress Mini Bar */}
+                <div className="mt-4 w-full h-1 bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div className={cn("h-full rounded-full w-[60%] group-hover:w-[75%] transition-all duration-500", style.bar)}></div>
+                </div>
             </div>
         </div>
-    )
+    );
 }
