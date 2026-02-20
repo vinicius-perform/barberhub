@@ -12,11 +12,32 @@ import BookingLanding from '../pages/public/BookingLanding';
 import BookingWizard from '../pages/public/BookingWizard';
 import Login from '../pages/auth/Login';
 
+// Saas Pages
+import SaasLayout from '../layouts/SaasLayout';
+import SaasLogin from '../pages/saas/SaasLogin';
+import SaasDashboard from '../pages/saas/SaasDashboard';
+import SaasBarbershopForm from '../pages/saas/SaasBarbershopForm';
+import SubscriptionGuard from '../components/SubscriptionGuard';
+
 export const router = createBrowserRouter([
     {
         path: '/',
         element: <Navigate to="/app/login" replace />,
     },
+    // SaaS Routes
+    {
+        path: '/saas/login',
+        element: <SaasLogin />
+    },
+    {
+        path: '/saas',
+        element: <SaasLayout />,
+        children: [
+            { path: 'dashboard', element: <SaasDashboard /> },
+            { path: 'barbershops/new', element: <SaasBarbershopForm /> }
+        ]
+    },
+    // App Routes
     {
         path: '/app',
         element: <AdminLayout />,
@@ -31,9 +52,14 @@ export const router = createBrowserRouter([
             { path: 'login', element: <Login /> },
         ]
     },
+    // Public Routes (PWA)
     {
         path: '/b/:slug',
-        element: <PublicLayout />,
+        element: (
+            <SubscriptionGuard>
+                <PublicLayout />
+            </SubscriptionGuard>
+        ),
         children: [
             {
                 index: true,
